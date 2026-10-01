@@ -1,0 +1,36 @@
+FROM php:8.4-apache-bookworm
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libfreetype6-dev \
+        libicu-dev \
+        libjpeg62-turbo-dev \
+        libpng-dev \
+        libzip-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j"$(nproc)" \
+        gd \
+        gettext \
+        intl \
+        mysqli \
+        opcache \
+        zip \
+    && pecl install apcu \
+    && docker-php-ext-enable apcu \
+    && a2enmod rewrite headers \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY docker/php-production.ini /usr/local/etc/php/conf.d/99-production.ini
+COPY docker/php-uploads.ini /usr/local/etc/php/conf.d/99-uploads.ini
+COPY docker/apache-vhost-production.conf /etc/apache2/sites-available/000-default.conf
+COPY docker/entrypoint-production.sh /usr/local/bin/osticket-entrypoint.sh
+RUN chmod +x /usr/local/bin/osticket-entrypoint.sh
+
+COPY . /var/www/html/ticket
+
+RUN mkdir -p /var/www/html/ticket/include/mpdf/tmp /var/www/html/ticket/include/mpdf/ttfontdata \
+    && chown -R www-data:www-data /var/www/html/ticket/include/mpdf/tmp /var/www/html/ticket/include/mpdf/ttfontdata
+
+WORKDIR /var/www/html/ticket
+
+ENTRYPOINT ["/usr/local/bin/osticket-entrypoint.sh"]
+CMD ["apache2-foreground"]

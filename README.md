@@ -55,6 +55,28 @@ cloned the git repo into)
     git pull
     php manage.php deploy -v /var/www/htdocs/osticket/
 
+### Docker (local development)
+
+From the repository root:
+
+    docker compose up -d --build
+
+Open http://localhost:8080/setup/ and use MySQL hostname `db` with the credentials from [docker-compose.yml](docker-compose.yml).
+
+### Docker (production layout — local smoke)
+
+    cp .env.example /tmp/osticket.env   # edit secrets and paths
+    cp docker/ost-config.php /path/from/OSTICKET_CONFIG_PATH
+    docker compose --env-file /tmp/osticket.env -f docker-compose.production.yml up -d --build
+
+Open http://127.0.0.1:8081/ticket/setup/ (app lives under `/ticket/` in the image). Use [`scripts/compose-production.sh`](scripts/compose-production.sh) on baser4wm with `/var/lib/osticket/.env`.
+
+### PRSM production (this fork)
+
+Production on **https://prsmusa.com/ticket/** (baser4wm backend, reverse SSH tunnel, VPS nginx) is documented in [docs/deploy-prsmusa.md](docs/deploy-prsmusa.md).
+
+Product and deployment chat for PRSM-related work (this helpdesk, sibling apps, infrastructure): [Slack channel](https://app.slack.com/client/T0C63084TQE/C0C64Q3JKAN).
+
 Upgrading
 ---------
 osTicket supports upgrading from 1.6-rc1 and later versions. As with any

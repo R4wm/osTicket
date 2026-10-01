@@ -2,5 +2,10 @@
 .gitignore
 .vagrant
 stage
-*.md
+.env
+.env.*
+**/.env
+**/.env.*
 include/ost-config.php
+include/mpdf/ttfontdata
+include/mpdf/tmp

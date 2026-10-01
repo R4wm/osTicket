@@ -1,0 +1,54 @@
+name: osticket
+
+services:
+  db:
+    image: mariadb:10.11
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-osticket}
+      MYSQL_USER: ${MYSQL_USER:?Set MYSQL_USER in --env-file}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in --env-file}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in --env-file}
+    volumes:
+      - osticket_db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    image: osticket-web:${OSTICKET_IMAGE_TAG:-local}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8081:80"
+    environment:
+      MYSQL_HOST: db
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-osticket}
+      MYSQL_USER: ${MYSQL_USER:?Set MYSQL_USER in --env-file}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in --env-file}
+      OSTICKET_MODE: ${OSTICKET_MODE:-auto}
+    volumes:
+      - type: bind
+        source: ${OSTICKET_CONFIG_PATH:?Set OSTICKET_CONFIG_PATH in --env-file}
+        target: /var/www/html/ticket/include/ost-config.php
+        read_only: ${OSTICKET_CONFIG_READONLY:-false}
+    depends_on:
+      db:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+volumes:
+  osticket_db:

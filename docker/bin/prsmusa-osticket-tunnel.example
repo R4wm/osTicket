@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Install as ~/bin/prsmusa-osticket-tunnel on baser4wm; chmod 700.
+set -u
+
+while true; do
+  /usr/bin/ssh -N -T \
+    -i /home/baser4wm/.ssh/prsmusa_osticket_tunnel \
+    -o IdentitiesOnly=yes \
+    -o StrictHostKeyChecking=yes \
+    -o ExitOnForwardFailure=yes \
+    -o ServerAliveInterval=30 \
+    -o ServerAliveCountMax=3 \
+    -o TCPKeepAlive=yes \
+    -R 127.0.0.1:18003:127.0.0.1:8081 \
+    r4wm@172.236.115.113
+  sleep 5
+done
