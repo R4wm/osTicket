@@ -2,7 +2,13 @@
 # Daily backup: stage DB + config, restic backup, forget 7d + prune.
 set -euo pipefail
 
-ENV_FILE="${OSTICKET_ENV_FILE:-/var/lib/osticket/.env}"
+if [[ -n "${OSTICKET_ENV_FILE:-}" ]]; then
+    ENV_FILE="${OSTICKET_ENV_FILE}"
+elif [[ -f "${HOME}/osticket/.env" ]]; then
+    ENV_FILE="${HOME}/osticket/.env"
+else
+    ENV_FILE="/var/lib/osticket/.env"
+fi
 LOCK="${BACKUP_LOCK:-/var/lib/osticket/backup.lock}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 

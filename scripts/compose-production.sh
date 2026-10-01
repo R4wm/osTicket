@@ -2,7 +2,15 @@
 # Wrapper: always pass deployment --env-file for Compose interpolation.
 set -euo pipefail
 
-ENV_FILE="${OSTICKET_ENV_FILE:-/var/lib/osticket/.env}"
+if [[ -n "${OSTICKET_ENV_FILE:-}" ]]; then
+    ENV_FILE="${OSTICKET_ENV_FILE}"
+elif [[ -f "${HOME}/osticket/.env" ]]; then
+    ENV_FILE="${HOME}/osticket/.env"
+elif [[ -f /var/lib/osticket/.env ]]; then
+    ENV_FILE="/var/lib/osticket/.env"
+else
+    ENV_FILE="/var/lib/osticket/.env"
+fi
 COMPOSE_FILE="${OSTICKET_COMPOSE_FILE:-docker-compose.production.yml}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
