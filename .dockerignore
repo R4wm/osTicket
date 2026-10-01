@@ -1,0 +1,6 @@
+.git
+.gitignore
+.vagrant
+stage
+*.md
+include/ost-config.php
