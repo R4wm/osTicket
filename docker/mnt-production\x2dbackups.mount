@@ -1,0 +1,14 @@
+[Unit]
+Description=PRSM osTicket dedicated NAS backups
+Wants=network-online.target
+After=network-online.target
+
+[Mount]
+What=10.0.0.240:/mnt/storage/production-backups/baser4wm
+Where=/mnt/production-backups
+Type=nfs
+Options=vers=3,rw,nosuid,nodev,noexec,_netdev
+TimeoutSec=30
+
+[Install]
+WantedBy=multi-user.target

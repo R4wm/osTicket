@@ -111,6 +111,23 @@ assert_failure_preserves() {
     [[ "$(metric osticket_backup_last_success_timestamp_seconds)" == "${success}" ]] || fail 'failure changed the successful backup timestamp'
     [[ "$(metric osticket_backup_last_attempt_success)" == 0 ]] || fail 'failure metric missing'
 }
+assert_configuration_failure() {
+    local setting="$1" invalid_value="$2" trace_lines
+    cp "${test_dir}/base.env" "${OSTICKET_ENV_FILE}"
+    expect_exit 0 "${script_root}/scripts/backup-osticket.sh"
+    [[ "$(metric osticket_backup_last_attempt_success)" == 1 ]] || fail 'configuration test requires a successful preceding backup'
+    trace_lines="$(wc -l < "${MOCK_TRACE}")"
+    if [[ "${invalid_value}" == __unset__ ]]; then
+        sed "/^${setting}=/d" "${test_dir}/base.env" > "${OSTICKET_ENV_FILE}"
+    else
+        printf '%s=%q\n' "${setting}" "${invalid_value}" >> "${OSTICKET_ENV_FILE}"
+    fi
+    assert_failure_preserves env -u "${setting}" "${script_root}/scripts/backup-osticket.sh"
+    [[ "$(metric osticket_backup_maintenance_success)" == 0 ]] || fail 'configuration failure did not immediately clear maintenance success'
+    [[ "$(metric osticket_backup_repository_free_bytes)" == -1 ]] || fail 'invalid configuration reported repository free space'
+    [[ "$(wc -l < "${MOCK_TRACE}")" == "${trace_lines}" ]] || fail 'invalid configuration reached Docker or Restic'
+    cp "${test_dir}/base.env" "${OSTICKET_ENV_FILE}"
+}
 
 expect_exit 0 "${script_root}/scripts/compose-production.sh" ps
 [[ "$(head -n 1 "${MOCK_TRACE}")" == *"--env-file ${OSTICKET_ENV_FILE}"* ]] || fail 'wrapper selected another env file'
@@ -135,6 +152,14 @@ done
 [[ "$(tar -tf "${MOCK_REMOTE}/latest.tar" | wc -l)" == 4 ]] || fail 'archive accumulated historical dumps'
 tar -xOf "${MOCK_REMOTE}/latest.tar" osticket.sql | grep -Fq 'VALUES (9)' || fail 'latest dump not restored'
 grep -Fq 'restic forget --keep-within 7d --prune' "${MOCK_TRACE}" || fail 'retention does not reclaim data'
+
+# Start each regression from success=1: an already-failed metric would conceal
+# configuration validation exiting before the metrics handler is installed.
+for setting in RESTIC_REPOSITORY RESTIC_PASSWORD_FILE NFS_MOUNT_POINT NFS_EXPECTED_SOURCE NFS_EXPECTED_FSTYPE; do
+    assert_configuration_failure "${setting}" ''
+done
+assert_configuration_failure NFS_EXPECTED_SOURCE __unset__
+assert_configuration_failure NFS_EXPECTED_FSTYPE ext4
 
 assert_failure_preserves env MOCK_EMPTY_DUMP=1 "${script_root}/scripts/backup-osticket.sh"
 before="$(archive_hash)"
