@@ -15,4 +15,4 @@ if ! flock -n 9; then
     echo "Cron already running; skipped."
     exit 0
 fi
-exec "${OSTICKET_SCRIPT_ROOT}/scripts/compose-production.sh" exec -T web php /var/www/html/ticket/api/cron.php
+exec "${OSTICKET_SCRIPT_ROOT}/scripts/compose-production.sh" exec -T --user www-data web php /var/www/html/ticket/api/cron.php

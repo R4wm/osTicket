@@ -188,6 +188,7 @@ expect_exit 75 "${script_root}/scripts/backup-osticket.sh"
 [[ "$(sha256sum "${test_dir}/metrics/backup.prom")" == "${before_metrics}" ]] || fail 'overlap changed active job metrics'
 exec 8>&-
 expect_exit 0 "${script_root}/scripts/run-cron.sh"
+tail -n 1 "${MOCK_TRACE}" | grep -Fq 'exec -T --user www-data web php' || fail 'cron did not use the application account'
 old_lines="$(wc -l < "${MOCK_TRACE}")"
 exec 8>"${test_dir}/locks/cron.lock"
 flock -n 8
