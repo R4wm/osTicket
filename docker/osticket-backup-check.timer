@@ -1,0 +1,10 @@
+[Unit]
+Description=Weekly PRSM osTicket repository integrity check
+
+[Timer]
+OnCalendar=Sun *-*-* 03:45:00 America/Indiana/Indianapolis
+Persistent=true
+Unit=osticket-backup-check.service
+
+[Install]
+WantedBy=timers.target

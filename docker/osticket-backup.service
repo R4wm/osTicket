@@ -1,0 +1,13 @@
+[Unit]
+Description=Back up PRSM osTicket to its dedicated NAS repository
+Wants=network-online.target
+After=network-online.target
+RequiresMountsFor=/mnt/production-backups
+
+[Service]
+Type=oneshot
+User=baser4wm
+Environment=OSTICKET_ENV_FILE=/home/baser4wm/osticket/.env
+ExecStart=/home/baser4wm/github/osTicket/scripts/backup-osticket.sh
+UMask=0077
+TimeoutStartSec=2h

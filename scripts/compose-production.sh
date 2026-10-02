@@ -2,21 +2,8 @@
 # Wrapper: always pass deployment --env-file for Compose interpolation.
 set -euo pipefail
 
-if [[ -n "${OSTICKET_ENV_FILE:-}" ]]; then
-    ENV_FILE="${OSTICKET_ENV_FILE}"
-elif [[ -f "${HOME}/osticket/.env" ]]; then
-    ENV_FILE="${HOME}/osticket/.env"
-elif [[ -f /var/lib/osticket/.env ]]; then
-    ENV_FILE="/var/lib/osticket/.env"
-else
-    ENV_FILE="/var/lib/osticket/.env"
-fi
-COMPOSE_FILE="${OSTICKET_COMPOSE_FILE:-docker-compose.production.yml}"
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-
-if [[ ! -f "${ENV_FILE}" ]]; then
-    echo "Missing ${ENV_FILE}. Copy .env.example and set secrets." >&2
-    exit 1
-fi
-
-exec docker compose --env-file "${ENV_FILE}" -f "${ROOT}/${COMPOSE_FILE}" "$@"
+# shellcheck source=lib-production.sh
+source "$(dirname "$0")/lib-production.sh"
+osticket_load_env
+exec docker compose --env-file "${OSTICKET_ENV_FILE}" \
+    -f "$(osticket_compose_file)" -p "${OSTICKET_PROJECT_NAME:-osticket}" "$@"

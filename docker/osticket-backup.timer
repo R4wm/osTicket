@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily PRSM osTicket backup at 03:15 Indianapolis time
+
+[Timer]
+OnCalendar=*-*-* 03:15:00 America/Indiana/Indianapolis
+Persistent=true
+Unit=osticket-backup.service
+
+[Install]
+WantedBy=timers.target
