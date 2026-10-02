@@ -6,6 +6,7 @@ while true; do
   /usr/bin/ssh -N -T \
     -i /home/baser4wm/.ssh/prsmusa_osticket_tunnel \
     -o IdentitiesOnly=yes \
+    -o BatchMode=yes \
     -o StrictHostKeyChecking=yes \
     -o ExitOnForwardFailure=yes \
     -o ServerAliveInterval=30 \

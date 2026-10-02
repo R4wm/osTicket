@@ -27,7 +27,8 @@ RUN chmod +x /usr/local/bin/osticket-entrypoint.sh
 
 COPY . /var/www/html/ticket
 
-RUN mkdir -p /var/www/html/ticket/include/mpdf/tmp /var/www/html/ticket/include/mpdf/ttfontdata \
+RUN rm -rf /var/www/html/ticket/docker \
+    && mkdir -p /var/www/html/ticket/include/mpdf/tmp /var/www/html/ticket/include/mpdf/ttfontdata \
     && chown -R www-data:www-data /var/www/html/ticket/include/mpdf/tmp /var/www/html/ticket/include/mpdf/ttfontdata
 
 WORKDIR /var/www/html/ticket

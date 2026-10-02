@@ -1,5 +1,8 @@
 .git
 .gitignore
+.dockerignore
+.github
+.cursor
 .vagrant
 stage
 .env
@@ -9,3 +12,15 @@ stage
 include/ost-config.php
 include/mpdf/ttfontdata
 include/mpdf/tmp
+docker-compose*.yml
+docker-compose*.yaml
+Dockerfile*
+docs
+scripts
+tests
+backups
+secrets
+*.sql.gz
+*.sql.zst
+*.tar
+*.tar.gz

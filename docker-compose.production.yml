@@ -41,6 +41,8 @@ services:
         source: ${OSTICKET_CONFIG_PATH:?Set OSTICKET_CONFIG_PATH in --env-file}
         target: /var/www/html/ticket/include/ost-config.php
         read_only: ${OSTICKET_CONFIG_READONLY:-false}
+        bind:
+          create_host_path: false
     depends_on:
       db:
         condition: service_healthy

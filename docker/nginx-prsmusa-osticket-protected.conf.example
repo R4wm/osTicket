@@ -1,6 +1,6 @@
-# Final production configuration. Deploy as /etc/nginx/snippets/prsmusa-osticket.conf
-# and include from the prsmusa.com HTTPS server block. For initial installation,
-# use nginx-prsmusa-osticket-install.conf.example instead; never include both.
+# Post-install acceptance configuration: keep the whole helpdesk protected.
+# Include only this variant until launch is authorized; then replace it with
+# nginx-prsmusa-osticket.conf.example. Setup remains blocked in both variants.
 
 location = /ticket {
     return 308 /ticket/;
@@ -15,6 +15,8 @@ location ^~ /ticket/ {
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
     proxy_redirect off;
+    auth_basic "osTicket acceptance";
+    auth_basic_user_file /etc/nginx/secrets/osticket-install.htpasswd;
 }
 
 location = /ticket/setup {
